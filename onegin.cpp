@@ -2,10 +2,11 @@
 
 int main(int argc, char *argv[])
 {
-    // error codes
+
+     //error codes
 
     const char *filename = "onegin.txt";
-    
+
     if (argc == 2)
     {
         filename = argv[1];
@@ -21,6 +22,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     Text text = readFile(fp);
+    printf("Size = %llu\n", sizeof(text.lines[0]));
     fclose(fp);
 
     qSort(text.lines, text.length, sizeof(Line), compareStr);
@@ -42,5 +44,6 @@ int main(int argc, char *argv[])
     printFile(&text, "All_Data.txt");
 
     freeAll(&text, &poem);
+
     return 0;
 }

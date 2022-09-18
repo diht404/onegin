@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <time.h>
 #include <sys\stat.h>
+#include <cstdint>
 
 /**
  * @brief Struct for storing a string and its' length
@@ -15,6 +16,7 @@ struct Line
 {
     char *str = nullptr;
     size_t length = 0;
+    char r = 0;
 };
 
 /**
@@ -98,6 +100,26 @@ int compareStrBack(const void *lhsVoid, const void *rhsVoid);
  * @param sorted true(default) if sorted print is required or false if not
  */
 void printFile(Text *text, const char *filename, bool sorted = true);
+
+/**
+ * @brief swaps two blocks
+ *
+ * @param lhs first block to swap
+ * @param rhs second block to swap
+ * @param remainSize remaining size to swap
+ * @param copiedSize size alreadyCopied
+ * @param sizeOfBlock size of block to copy
+ */
+void swapBlock(void *lhs, void *rhs, size_t *remainSize, size_t *copiedSize, size_t sizeOfBlock);
+
+/**
+ * @brief swaps two objects
+ *
+ * @param lhsVoid first object to swap
+ * @param rhsVoid second object to swap
+ * @param size size of object
+ */
+void swap(void *lhsVoid, void *rhsVoid, size_t size);
 
 /**
  * @brief swap two lines

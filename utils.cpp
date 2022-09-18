@@ -45,7 +45,8 @@ Text readFile(FILE *fp)
     size_t numLines = countLines(txt, lenOfFile);
 
     Line *lines = (Line *) calloc(numLines + 1, sizeof(lines[0]));
-    size_t *lensOfStrings = (size_t *) calloc(numLines + 1, sizeof(lensOfStrings[0]));
+    size_t *lensOfStrings =
+        (size_t *) calloc(numLines + 1, sizeof(lensOfStrings[0]));
 
     if (lines == nullptr)
     {
@@ -186,14 +187,64 @@ int compareStrBack(const void *lhsVoid, const void *rhsVoid)
     return 1;
 }
 
+void swapBlock(void *lhsVoid,
+               void *rhsVoid,
+               size_t *remainSize,
+               size_t *copiedSize,
+               size_t sizeOfBlock)
+{
+    assert(lhsVoid != nullptr);
+    assert(rhsVoid != nullptr);
+    char *lhs = (char *) lhsVoid;
+    char *rhs = (char *) rhsVoid;
+
+    uint64_t block = 0;
+    size_t numBlocks = *remainSize / sizeOfBlock;
+
+    for (size_t i = 0; i < numBlocks; i++)
+    {
+        memcpy(&block,
+               lhs + *copiedSize + i * sizeOfBlock,
+               sizeOfBlock);
+        memcpy(lhs + *copiedSize + i * sizeOfBlock,
+               rhs + *copiedSize + i * sizeOfBlock,
+               sizeOfBlock);
+        memcpy(rhs + *copiedSize + i * sizeOfBlock,
+               &block,
+               sizeOfBlock);
+    }
+    *copiedSize += numBlocks * sizeOfBlock;
+    *remainSize %= sizeOfBlock;
+}
+
+void swap(void *lhs, void *rhs, size_t size)
+{
+    size_t copiedSize = 0;
+
+    size_t remainSize = size;
+    swapBlock(lhs, rhs, &remainSize, &copiedSize, sizeof(uint64_t));
+    if (!remainSize)
+        return;
+
+    swapBlock(lhs, rhs, &remainSize, &copiedSize, sizeof(uint32_t));
+    if (!remainSize)
+        return;
+
+    swapBlock(lhs, rhs, &remainSize, &copiedSize, sizeof(uint16_t));
+    if (!remainSize)
+        return;
+
+    swapBlock(lhs, rhs, &remainSize, &copiedSize, sizeof(uint8_t));
+    if (!remainSize)
+        return;
+}
+
 void swapLines(Line *lhs, Line *rhs)
 {
     assert(lhs != nullptr);
     assert(rhs != nullptr);
 
-    Line tmp = *lhs;
-    *lhs = *rhs;
-    *rhs = tmp;
+    swap(lhs, rhs, sizeof(Line));
 }
 
 size_t partition(Line *lines, const size_t l, const size_t r,
@@ -263,8 +314,8 @@ void printFile(Text *text, const char *filename, bool sorted)
         size_t numOfLines = 0;
         while (numOfLines < text->length)
         {
-            fprintf(fp, "%s\n", text->txt+startOfString);
-            startOfString+=text->lensOfStrings[numOfLines];
+            fprintf(fp, "%s\n", text->txt + startOfString);
+            startOfString += text->lensOfStrings[numOfLines];
             numOfLines++;
         }
     }
