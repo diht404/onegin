@@ -46,7 +46,8 @@ struct Poem
 
 const int ShakespeareNumLines = 7;
 
-enum ErrorCodes{
+enum ErrorCodes
+{
     NO_ERRORS = 0,
     GET_MORE_THAN_1_COMMAND_LINE_ARGUMENT = 1,
     CANT_OPEN_FILE = 2,
@@ -143,7 +144,11 @@ void printFile(Text *text, const char *filename, bool sorted = true);
  * @param copiedSize size alreadyCopied
  * @param sizeOfBlock size of block to copy
  */
-void swapBlock(void *lhs, void *rhs, size_t *remainSize, size_t *copiedSize, size_t sizeOfBlock);
+void swapBlock(void *lhs,
+               void *rhs,
+               size_t *remainSize,
+               size_t *copiedSize,
+               size_t sizeOfBlock);
 
 /**
  * @brief swaps two objects

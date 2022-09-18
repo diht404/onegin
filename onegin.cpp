@@ -3,7 +3,6 @@
 int main(int argc, char *argv[])
 {
     int error = NO_ERRORS;
-
     const char *filename = "onegin.txt";
 
     if (argc == 2)
@@ -18,12 +17,12 @@ int main(int argc, char *argv[])
 
     FILE *fp = nullptr;
     error = openFile(filename, "r", &fp);
-    if(!error)
+    if (!error)
         processError(error);
 
     Text text = {};
     error = readFile(fp, &text);
-    if(!error)
+    if (!error)
         processError(error);
 
     fclose(fp);
@@ -44,7 +43,7 @@ int main(int argc, char *argv[])
                  numParts,
                  ShakespeareNumLines};
     error = generatePoem(&text, numParts, &poem.poem);
-    if(!error)
+    if (!error)
         processError(error);
 
     printPoem(&poem);

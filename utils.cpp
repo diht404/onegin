@@ -430,7 +430,7 @@ void generateBlock(Text *text, char ***poem)
     assert(poem != nullptr);
 
     size_t lineId = 0;
-    // Shakespeare wrote 8 lines in block
+    // Shakespeare wrote 7 lines in block
     // Rhymes:
     // 0 and 2
     // 1 and 3 and 4
@@ -461,7 +461,7 @@ int generatePoem(Text *text, size_t numParts, char ***poem)
                              sizeof(char *));
     if (*poem == nullptr)
         return CANT_ALLOCATE_MEMORY_FOR_POEM;
-    srand((unsigned int)time(nullptr));
+    srand((unsigned int) time(nullptr));
     for (size_t i = 0; i < numParts; i++)
     {
         generateBlock(text, poem);
