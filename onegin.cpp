@@ -22,7 +22,6 @@ int main(int argc, char *argv[])
         return 1;
     }
     Text text = readFile(fp);
-    printf("Size = %llu\n", sizeof(text.lines[0]));
     fclose(fp);
 
     qSort(text.lines, text.length, sizeof(Line), compareStr);

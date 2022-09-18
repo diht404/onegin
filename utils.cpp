@@ -100,14 +100,16 @@ int compareStr(const void *lhsVoid, const void *rhsVoid)
             r_pos++;
             continue;
         }
-        // как тут удалять
-        if (lhs->str[l_pos] < rhs->str[r_pos])
-        {
-            return -1;
-        }
 
-        if (lhs->str[l_pos] > rhs->str[r_pos])
-            return 1;
+        int comparation = lhs->str[l_pos] - rhs->str[r_pos];
+        if (comparation < 0)
+        {
+            return comparation;
+        }
+        if (comparation > 0)
+        {
+            return comparation;
+        }
 
         l_pos++;
         r_pos++;
@@ -153,14 +155,14 @@ int compareStrBack(const void *lhsVoid, const void *rhsVoid)
             r_pos--;
             continue;
         }
-
-        if (lhs->str[l_pos] < rhs->str[r_pos])
+        int comparation = lhs->str[l_pos] - rhs->str[r_pos];
+        if (comparation < 0)
         {
-            return -1;
+            return comparation;
         }
-        if (lhs->str[l_pos] > rhs->str[r_pos])
+        if (comparation > 0)
         {
-            return 1;
+            return comparation;
         }
 
         l_pos--;
@@ -239,57 +241,53 @@ void swap(void *lhs, void *rhs, size_t size)
         return;
 }
 
-void swapLines(Line *lhs, Line *rhs)
-{
-    assert(lhs != nullptr);
-    assert(rhs != nullptr);
-
-    swap(lhs, rhs, sizeof(Line));
-}
-
-size_t partition(Line *lines, const size_t l, const size_t r,
+size_t partition(void *array,
+                 const size_t l,
+                 const size_t r,
+                 size_t size,
                  int (*comp)(const void *, const void *))
 {
-    assert(lines != nullptr);
+    assert(array != nullptr);
     assert(comp != nullptr);
 
-    Line *pivot = &lines[r];
-    int greaterLine = l - 1;
+    void *pivot = (char *) array + r * size;
+    size_t greaterLine = l - 1;
 
-    for (int j = l; j < r; j++)
+    for (size_t j = l; j < r; j++)
     {
-        if (comp(&lines[j], pivot) <= 0)
+        if (comp((char *) array + j * size, pivot) <= 0)
         {
-            swapLines(&lines[++greaterLine], &lines[j]);
+            ++greaterLine;
+            swap((char *) array + greaterLine * size, (char *) array + j * size, size);
         }
     }
-
-    swapLines(&lines[++greaterLine], pivot);
+    ++greaterLine;
+    swap((char *) + array + greaterLine * size, pivot, size);
 
     return greaterLine;
 }
 
-void sort(Line *lines, const size_t l, const size_t r,
+void sort(void *array, const size_t l, const size_t r, size_t size,
           int (*comp)(const void *, const void *))
 {
-    assert(lines != nullptr);
+    assert(array != nullptr);
     assert(comp != nullptr);
 
     if (l < r)
     {
-        size_t pivotInd = partition(lines, l, r, comp);
-        sort(lines, l, pivotInd - 1, comp);
-        sort(lines, pivotInd + 1, r, comp);
+        size_t pivotInd = partition(array, l, r, size, comp);
+        sort(array, l, pivotInd - 1, size, comp);
+        sort(array, pivotInd + 1, r, size, comp);
     }
 }
 
-void qSort(Line *lines, const size_t count, size_t size,
+void qSort(void *array, const size_t count, size_t size,
            int (*comp)(const void *, const void *))
 {
-    assert(lines != nullptr);
+    assert(array != nullptr);
     assert(comp != nullptr);
 
-    sort(lines, 0, count - 1, comp);
+    sort(array, 0, count - 1, size, comp);
 }
 
 void printFile(Text *text, const char *filename, bool sorted)

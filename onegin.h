@@ -122,44 +122,36 @@ void swapBlock(void *lhs, void *rhs, size_t *remainSize, size_t *copiedSize, siz
 void swap(void *lhsVoid, void *rhsVoid, size_t size);
 
 /**
- * @brief swap two lines
- *
- * @param lhsVoid first string to swap
- * @param rhsVoid second string to swap
- */
-void swapLines(Line *lhs, Line *rhs);
-
-/**
  * @brief partition implementation for qsort with rightmost pivot
  *
- * @param lines pointer to the array to sort
+ * @param array pointer to the array to sort
  * @param l the left border of the segment
  * @param r the right border of the segment
  * @param comp comparator for strings
  */
-size_t partition(Line *lines, size_t l, size_t r,
+size_t partition(void *array, size_t l, size_t r, size_t size,
                  int (*comp)(const void *, const void *));
 
 /**
  * @brief qsort implementation
  *
- * @param lines pointer to the array to sort
+ * @param array pointer to the array to sort
  * @param l the left border of the segment
  * @param r the right border of the segment
  * @param comp comparator for strings
  */
-void sort(Line *lines, size_t l, size_t r,
+void sort(void *array, size_t l, size_t r, size_t size,
           int (*comp)(const void *, const void *));
 
 /**
  * @brief qsort with signature similar to qsort from stdlib.h
  *
- * @param lines pointer to the array to sort
+ * @param array pointer to the array to sort
  * @param count number of elements in the array
  * @param size size of each element in the array in bytes
  * @param comp comparator for strings
  */
-void qSort(Line *lines, size_t count, size_t size,
+void qSort(void *array, size_t count, size_t size,
            int (*comp)(const void *, const void *));
 
 /**
