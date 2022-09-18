@@ -178,11 +178,7 @@ int compareStr(const void *lhsVoid, const void *rhsVoid)
         }
 
         int comparation = lhs->str[l_pos] - rhs->str[r_pos];
-        if (comparation < 0)
-        {
-            return comparation;
-        }
-        if (comparation > 0)
+        if (comparation != 0)
         {
             return comparation;
         }
@@ -232,11 +228,7 @@ int compareStrBack(const void *lhsVoid, const void *rhsVoid)
             continue;
         }
         int comparation = lhs->str[l_pos] - rhs->str[r_pos];
-        if (comparation < 0)
-        {
-            return comparation;
-        }
-        if (comparation > 0)
+        if (comparation != 0)
         {
             return comparation;
         }
