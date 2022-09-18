@@ -16,7 +16,6 @@ struct Line
 {
     char *str = nullptr;
     size_t length = 0;
-    char r = 0;
 };
 
 /**
@@ -47,28 +46,62 @@ struct Poem
 
 const int ShakespeareNumLines = 7;
 
+enum ErrorCodes{
+    NO_ERRORS = 0,
+    GET_MORE_THAN_1_COMMAND_LINE_ARGUMENT = 1,
+    CANT_OPEN_FILE = 2,
+    CANT_GET_FILE_INFO = 3,
+    CANT_ALLOCATE_MEMORY_FOR_FILE = 4,
+    CANT_ALLOCATE_MEMORY_FOR_STRINGS = 5,
+    CANT_ALLOCATE_MEMORY_FOR_STRINGS_LENGTH = 6,
+    CANT_ALLOCATE_MEMORY_FOR_POEM = 7,
+};
+
+void processError(int error);
+
+/**
+ * @brief opens file
+ *
+ * @param filename name of the file to open
+ * @param mode mode to open the file
+ * @param fp file
+ * @return error code
+ */
+int openFile(const char *filename, const char *mode, FILE **fp);
+
 /**
  * @brief return length of file in bytes
  *
  * @param fp - opened file
- * @return length of file
+ * @param lenOfFile - length of file
+ * @return error code
  */
-long getLenOfFile(FILE *fp);
+int getLenOfFile(FILE *fp, size_t *lenOfFile);
 
 /**
  * reads file to buffer
  * @param fp - opened file
  * @param lenOfFile - variable for storing length of file
- * @return array storing file
+ * @param txt - array storing file
+ * @return error code
  */
-char *readFileToBuf(FILE *fp, long *lenOfFile);
+int readFileToBuf(FILE *fp, size_t *lenOfFile, char **txt);
+
+/**
+ * @brief counts lines in buffer
+ * @param txt - buffer with text
+ * @param lenOfFile - len of buffer
+ * @return number of lines in buffer
+ */
+size_t countLines(const char *txt, size_t lenOfFile);
 
 /**
  * reads file to struct Text
  * @param fp - opened file
- * @return struct Text with file
+ * @param text - struct Text with file
+ * @return error code
  */
-Text readFile(FILE *fp);
+int readFile(FILE *fp, Text *text);
 
 /**
  * @brief comparator for strings (operator <)
@@ -161,16 +194,17 @@ void qSort(void *array, size_t count, size_t size,
  * @param poem array of pointers to string of poem
  * @return void
  */
-void generateBlock(Text *text, char **poem);
+void generateBlock(Text *text, char ***poem);
 
 /**
  * @brief generate poem with numParts blocks
  *
  * @param text back sorted text for generation
  * @param numParts number of blocks to generate
- * @return array of pointers to string of poem
+ * @param poem array of pointers to string of poem
+ * @return error code
  */
-char **generatePoem(Text *text, size_t numParts);
+int generatePoem(Text *text, size_t numParts, char ***poem);
 
 /**
  * @brief selects random line index from text

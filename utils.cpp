@@ -1,33 +1,97 @@
 #include "onegin.h"
 
-long getLenOfFile(FILE *fp)
+void processError(int error)
 {
-    struct stat buff = {};
-    fstat(fileno(fp), &buff);
-    long lenOfFile = buff.st_size;
-    return lenOfFile;
+    switch (error)
+    {
+        case NO_ERRORS:
+            break;
+        case CANT_ALLOCATE_MEMORY_FOR_FILE:
+            fprintf(stderr,
+                    "Not enough free space to allocate memory for storing the file.\n");
+            break;
+        case CANT_ALLOCATE_MEMORY_FOR_STRINGS:
+            fprintf(stderr,
+                    "Not enough free space to allocate memory for storing info about lines of file.\n");
+            break;
+        case CANT_GET_FILE_INFO:
+            fprintf(stderr,
+                    "Can't get info about file.\n");
+            break;
+        case CANT_ALLOCATE_MEMORY_FOR_STRINGS_LENGTH:
+            fprintf(stderr,
+                    "Not enough free space to allocate memory for storing info about length of lines of file.\n");
+            break;
+        case CANT_ALLOCATE_MEMORY_FOR_POEM:
+            fprintf(stderr,
+                    "Not enough free space to allocate memory for storing the poem.\n");
+            break;
+        case CANT_OPEN_FILE:
+            fprintf(stderr,
+                    "Can't open the file.\n");
+            break;
+        case GET_MORE_THAN_1_COMMAND_LINE_ARGUMENT:
+            fprintf(stderr,
+                    "Required 0 or 1 command line arguments, but get more than 1.\n");
+            break;
+        default:
+            fprintf(stderr, "Unknown error code: %d.\n",
+                    error);
+            break;
+    }
 }
 
-char *readFileToBuf(FILE *fp, long *lenOfFile)
+int openFile(const char *filename, const char *mode, FILE **fp)
+{
+    assert(filename != nullptr);
+    assert(mode != nullptr);
+    assert(fp != nullptr);
+
+    *fp = fopen(filename, "r");
+    if (*fp == nullptr)
+    {
+        return CANT_OPEN_FILE;
+    }
+    return NO_ERRORS;
+}
+
+int getLenOfFile(FILE *fp, size_t *lenOfFile)
 {
     assert(fp != nullptr);
     assert(lenOfFile != nullptr);
 
-    *lenOfFile = getLenOfFile(fp);
-
-    char *txt = (char *) calloc(*lenOfFile + 1, sizeof(char));
-    if (txt == nullptr)
-    {
-        fprintf(stderr, "Can't allocate memory.");
-    }
-    fread(txt, sizeof(char), *lenOfFile, fp);
-    return txt;
+    struct stat buff = {};
+    if (fstat(fileno(fp), &buff) != 0)
+        return CANT_GET_FILE_INFO;
+    *lenOfFile = buff.st_size;
+    return NO_ERRORS;
 }
 
-size_t countLines(const char *txt, long lenOfFile)
+int readFileToBuf(FILE *fp, size_t *lenOfFile, char **txt)
 {
+    assert(fp != nullptr);
+    assert(lenOfFile != nullptr);
+    assert(txt != nullptr);
+
+    int error = getLenOfFile(fp, lenOfFile);
+    if (error)
+        return error;
+
+    *txt = (char *) calloc(*lenOfFile + 1, sizeof(char));
+    if (*txt == nullptr)
+    {
+        return CANT_ALLOCATE_MEMORY_FOR_FILE;
+    }
+    fread(*txt, sizeof(char), *lenOfFile, fp);
+    return error;
+}
+
+size_t countLines(const char *txt, size_t lenOfFile)
+{
+    assert(txt != nullptr);
+
     size_t numLines = 1;
-    for (long i = 0; i < lenOfFile; i++)
+    for (size_t i = 0; i < lenOfFile; i++)
     {
         if (txt[i] == '\n')
             numLines++;
@@ -35,27 +99,37 @@ size_t countLines(const char *txt, long lenOfFile)
     return numLines;
 }
 
-Text readFile(FILE *fp)
+int readFile(FILE *fp, Text *text)
 {
     assert(fp != nullptr);
+    assert(text != nullptr);
 
-    long lenOfFile = 0;
-    char *txt = readFileToBuf(fp, &lenOfFile);
+    size_t lenOfFile = 0;
+    char *txt = nullptr;
+    int error = readFileToBuf(fp, &lenOfFile, &txt);
+
+    if (error)
+        return error;
 
     size_t numLines = countLines(txt, lenOfFile);
 
     Line *lines = (Line *) calloc(numLines + 1, sizeof(lines[0]));
+    if (lines == nullptr)
+    {
+        return CANT_ALLOCATE_MEMORY_FOR_STRINGS;
+    }
     size_t *lensOfStrings =
         (size_t *) calloc(numLines + 1, sizeof(lensOfStrings[0]));
 
-    if (lines == nullptr)
+    if (lensOfStrings == nullptr)
     {
-        fprintf(stderr, "Can't allocate memory.");
+        return CANT_ALLOCATE_MEMORY_FOR_STRINGS_LENGTH;
     }
+
     size_t position = 0;
     size_t line_id = 0;
 
-    for (long i = 0; i < lenOfFile; i++)
+    for (size_t i = 0; i < lenOfFile; i++)
     {
         if (position == 0)
         {
@@ -74,7 +148,9 @@ Text readFile(FILE *fp)
             line_id++;
         }
     }
-    return {lines, numLines, txt, lensOfStrings};
+
+    *text = {lines, numLines, txt, lensOfStrings};
+    return error;
 }
 
 int compareStr(const void *lhsVoid, const void *rhsVoid)
@@ -140,8 +216,8 @@ int compareStrBack(const void *lhsVoid, const void *rhsVoid)
     const Line *lhs = (const Line *) lhsVoid;
     const Line *rhs = (const Line *) rhsVoid;
 
-    long l_pos = lhs->length - 1;
-    long r_pos = rhs->length - 1;
+    long long l_pos = lhs->length - 1;
+    long long r_pos = rhs->length - 1;
 
     while (l_pos >= 0 and r_pos >= 0)
     {
@@ -197,6 +273,9 @@ void swapBlock(void *lhsVoid,
 {
     assert(lhsVoid != nullptr);
     assert(rhsVoid != nullptr);
+    assert(remainSize != nullptr);
+    assert(copiedSize != nullptr);
+
     char *lhs = (char *) lhsVoid;
     char *rhs = (char *) rhsVoid;
 
@@ -221,6 +300,9 @@ void swapBlock(void *lhsVoid,
 
 void swap(void *lhs, void *rhs, size_t size)
 {
+    assert(lhs != nullptr);
+    assert(rhs != nullptr);
+
     size_t copiedSize = 0;
 
     size_t remainSize = size;
@@ -258,11 +340,13 @@ size_t partition(void *array,
         if (comp((char *) array + j * size, pivot) <= 0)
         {
             ++greaterLine;
-            swap((char *) array + greaterLine * size, (char *) array + j * size, size);
+            swap((char *) array + greaterLine * size,
+                 (char *) array + j * size,
+                 size);
         }
     }
     ++greaterLine;
-    swap((char *) + array + greaterLine * size, pivot, size);
+    swap((char *) +array + greaterLine * size, pivot, size);
 
     return greaterLine;
 }
@@ -300,7 +384,7 @@ void printFile(Text *text, const char *filename, bool sorted)
     if (sorted)
     {
         // print of sorted array
-        for (int i = 0; i < text->length; i++)
+        for (size_t i = 0; i < text->length; i++)
         {
             fprintf(fp, "%s\n", text->lines[i].str);
         }
@@ -340,9 +424,10 @@ size_t generateLineId(Text *text)
     return lineId;
 }
 
-void generateBlock(Text *text, char **poem)
+void generateBlock(Text *text, char ***poem)
 {
     assert(text != nullptr);
+    assert(poem != nullptr);
 
     size_t lineId = 0;
     // Shakespeare wrote 8 lines in block
@@ -352,39 +437,44 @@ void generateBlock(Text *text, char **poem)
     // 5 and 6
 
     lineId = generateLineId(text);
-    poem[0] = (text->lines[lineId].str);
-    poem[2] = (text->lines[lineId + 1].str);
+    (*poem)[0] = (text->lines[lineId].str);
+    (*poem)[2] = (text->lines[lineId + 1].str);
 
     lineId = generateLineId(text);
-    poem[1] = (text->lines[lineId].str);
-    poem[3] = (text->lines[lineId + 1].str);
-    poem[4] = (text->lines[lineId + 2].str);
+    (*poem)[1] = (text->lines[lineId].str);
+    (*poem)[3] = (text->lines[lineId + 1].str);
+    (*poem)[4] = (text->lines[lineId + 2].str);
 
     lineId = generateLineId(text);
-    poem[5] = (text->lines[lineId].str);
-    poem[6] = (text->lines[lineId + 1].str);
+    (*poem)[5] = (text->lines[lineId].str);
+    (*poem)[6] = (text->lines[lineId + 1].str);
 }
 
-char **generatePoem(Text *text, size_t numParts)
+int generatePoem(Text *text, size_t numParts, char ***poem)
 {
     assert(text != nullptr);
+    assert(poem != nullptr);
 
+    int error = NO_ERRORS;
     // Shakespeare wrote 7 lines in block
-    char **poem = (char **) calloc(ShakespeareNumLines * numParts,
-                                   sizeof(char *));
-
-    srand(time(0));
-    for (int i = 0; i < numParts; i++)
+    *poem = (char **) calloc(ShakespeareNumLines * numParts,
+                             sizeof(char *));
+    if (*poem == nullptr)
+        return CANT_ALLOCATE_MEMORY_FOR_POEM;
+    srand((unsigned int)time(nullptr));
+    for (size_t i = 0; i < numParts; i++)
     {
         generateBlock(text, poem);
-        poem += ShakespeareNumLines;
+        *poem += ShakespeareNumLines;
     }
-    poem -= ShakespeareNumLines * numParts;
-    return poem;
+    *poem -= ShakespeareNumLines * numParts;
+    return error;
 }
 
 void printPoem(Poem *poem)
 {
+    assert(poem != nullptr);
+
     for (size_t i = 0; i < poem->numParts * poem->numLines; i++)
     {
         printf("%llu: %s\n", i % poem->numLines * 1, poem->poem[i]);
@@ -395,6 +485,9 @@ void printPoem(Poem *poem)
 
 void freeAll(Text *text, Poem *poem)
 {
+    assert(text != nullptr);
+    assert(poem != nullptr);
+
     free(text->txt);
     free(text->lines);
     free(poem->poem);
