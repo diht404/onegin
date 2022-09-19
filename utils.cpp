@@ -375,7 +375,7 @@ void printFile(Text *text, const char *filename, bool sorted)
 
     if (sorted)
     {
-        // print of sorted array
+        // print sorted array
         for (size_t i = 0; i < text->length; i++)
         {
             fprintf(fp, "%s\n", text->lines[i].str);
@@ -449,7 +449,7 @@ int generatePoem(Text *text, size_t numParts, char ***poem)
 
     int error = NO_ERRORS;
     // Shakespeare wrote 7 lines in block
-    *poem = (char **) calloc(ShakespeareNumLines * numParts,
+    *poem = (char **) calloc(ShakespeareNumLines * numParts + 1,
                              sizeof(char *));
     if (*poem == nullptr)
         return CANT_ALLOCATE_MEMORY_FOR_POEM;
