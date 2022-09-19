@@ -6,6 +6,18 @@ void processError(int error)
     {
         case NO_ERRORS:
             break;
+        case GET_MORE_THAN_1_COMMAND_LINE_ARGUMENT:
+            fprintf(stderr,
+                    "Required 0 or 1 command line arguments, but get more than 1.\n");
+            break;
+        case CANT_OPEN_FILE:
+            fprintf(stderr,
+                    "Can't open the file.\n");
+            break;
+        case CANT_GET_FILE_INFO:
+            fprintf(stderr,
+                    "Can't get info about file.\n");
+            break;
         case CANT_ALLOCATE_MEMORY_FOR_FILE:
             fprintf(stderr,
                     "Not enough free space to allocate memory for storing the file.\n");
@@ -14,10 +26,6 @@ void processError(int error)
             fprintf(stderr,
                     "Not enough free space to allocate memory for storing info about lines of file.\n");
             break;
-        case CANT_GET_FILE_INFO:
-            fprintf(stderr,
-                    "Can't get info about file.\n");
-            break;
         case CANT_ALLOCATE_MEMORY_FOR_STRINGS_LENGTH:
             fprintf(stderr,
                     "Not enough free space to allocate memory for storing info about length of lines of file.\n");
@@ -25,14 +33,6 @@ void processError(int error)
         case CANT_ALLOCATE_MEMORY_FOR_POEM:
             fprintf(stderr,
                     "Not enough free space to allocate memory for storing the poem.\n");
-            break;
-        case CANT_OPEN_FILE:
-            fprintf(stderr,
-                    "Can't open the file.\n");
-            break;
-        case GET_MORE_THAN_1_COMMAND_LINE_ARGUMENT:
-            fprintf(stderr,
-                    "Required 0 or 1 command line arguments, but get more than 1.\n");
             break;
         default:
             fprintf(stderr, "Unknown error code: %d.\n",
