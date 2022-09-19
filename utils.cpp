@@ -476,13 +476,18 @@ void printPoem(Poem *poem)
     }
 }
 
-void freeAll(Text *text, Poem *poem)
+void freeText(Text *text)
 {
     assert(text != nullptr);
-    assert(poem != nullptr);
 
     free(text->txt);
     free(text->lines);
-    free(poem->poem);
     free(text->lensOfStrings);
+}
+
+void freePoem(Poem *poem)
+{
+    assert(poem != nullptr);
+
+    free(poem->poem);
 }

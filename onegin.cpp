@@ -48,7 +48,8 @@ int main(int argc, char *argv[])
 
     printPoem(&poem);
 
-    freeAll(&text, &poem);
+    freeText(&text);
+    freePoem(&poem);
 
     return 0;
 }
