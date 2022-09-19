@@ -163,22 +163,22 @@ void swap(void *lhsVoid, void *rhsVoid, size_t size);
  * @brief partition implementation for qsort with rightmost pivot
  *
  * @param array pointer to the array to sort
- * @param l the left border of the segment
- * @param r the right border of the segment
+ * @param left the left border of the segment
+ * @param right the right border of the segment
  * @param comp comparator for strings
  */
-size_t partition(void *array, size_t l, size_t r, size_t size,
+size_t partition(void *array, size_t left, size_t right, size_t size,
                  int (*comp)(const void *, const void *));
 
 /**
  * @brief qsort implementation
  *
  * @param array pointer to the array to sort
- * @param l the left border of the segment
- * @param r the right border of the segment
+ * @param left the left border of the segment
+ * @param right the right border of the segment
  * @param comp comparator for strings
  */
-void sort(void *array, size_t l, size_t r, size_t size,
+void sort(void *array, size_t left, size_t right, size_t size,
           int (*comp)(const void *, const void *));
 
 /**

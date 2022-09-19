@@ -63,6 +63,7 @@ int getLenOfFile(FILE *fp, size_t *lenOfFile)
     struct stat buff = {};
     if (fstat(fileno(fp), &buff) != 0)
         return CANT_GET_FILE_INFO;
+
     *lenOfFile = buff.st_size;
     return NO_ERRORS;
 }
@@ -316,18 +317,18 @@ void swap(void *lhs, void *rhs, size_t size)
 }
 
 size_t partition(void *array,
-                 const size_t l,
-                 const size_t r,
+                 const size_t left,
+                 const size_t right,
                  size_t size,
                  int (*comp)(const void *, const void *))
 {
     assert(array != nullptr);
     assert(comp != nullptr);
 
-    void *pivot = (char *) array + r * size;
-    size_t greaterLine = l - 1;
+    void *pivot = (char *) array + right * size;
+    size_t greaterLine = left - 1;
 
-    for (size_t j = l; j < r; j++)
+    for (size_t j = left; j < right; j++)
     {
         if (comp((char *) array + j * size, pivot) <= 0)
         {
@@ -343,17 +344,17 @@ size_t partition(void *array,
     return greaterLine;
 }
 
-void sort(void *array, const size_t l, const size_t r, size_t size,
+void sort(void *array, const size_t left, const size_t right, size_t size,
           int (*comp)(const void *, const void *))
 {
     assert(array != nullptr);
     assert(comp != nullptr);
 
-    if (l < r)
+    if (left < right)
     {
-        size_t pivotInd = partition(array, l, r, size, comp);
-        sort(array, l, pivotInd - 1, size, comp);
-        sort(array, pivotInd + 1, r, size, comp);
+        size_t pivotInd = partition(array, left, right, size, comp);
+        sort(array, left, pivotInd - 1, size, comp);
+        sort(array, pivotInd + 1, right, size, comp);
     }
 }
 
